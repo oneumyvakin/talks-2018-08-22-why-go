@@ -1,0 +1,129 @@
+<html>
+	<head>
+		<script src="lib/js/amcharts/amcharts.js"></script>
+		<script src="lib/js/amcharts/serial.js"></script>
+		<script src="lib/js/amcharts/export.min.js"></script>
+		<script src="lib/js/amcharts/light.js"></script>		
+		
+		<link rel="stylesheet" href="lib/css/amcharts/export.css" type="text/css" media="all" />
+	</head>
+	<body>
+	
+		<div id="chartdiv" width="100%" height="100%"></div>
+
+		<script>
+		var chart = AmCharts.makeChart("chartdiv", {
+			"type": "serial",
+			"theme": "light",
+			"legend": {
+				"equalWidths": false,
+				"useGraphSettings": true,
+				"valueAlign": "left",
+				"valueWidth": 120
+			},
+			"dataProvider": [
+			{
+				"date": "2012-01-01"
+				
+			}, {
+				"date": "2012-01-02"
+				
+			}, {
+				"date": "2012-01-03",
+				"level": "Вы круты",
+				"townSize": 25,
+				"latitude": 1
+			}, {
+				"date": "2012-01-04",
+				"level": "Вы сделали крутой свою команду",
+				"townSize": 20,
+				"latitude": 2,
+				"dashLength": 8
+			}, {
+				"date": "2012-01-05",
+				"level": "Вы с командой сделали свой продукт успешным",
+				"townSize": 20,
+				"latitude": 3,
+				"dashLength": 8
+			}, {
+				"date": "2012-01-06",
+				"level": "Вы сделали успешной Вашу компанию",
+				"townSize": 20,
+				"latitude": 4,
+				"dashLength": 8
+			}, {
+				"date": "2012-01-07",
+				"level": "???",
+				"townSize": 25,
+				"latitude": 5,
+				"dashLength": 8
+			}, {
+				"date": "2012-01-08"
+			}, {
+				"date": "2012-01-09"
+			}],
+			"valueAxes": [ {
+				"id": "latitudeAxis",
+				"axisAlpha": 0,
+				"gridAlpha": 0,
+				"labelsEnabled": false,
+				"position": "right"
+			}],
+			"graphs": [ {
+				"balloonText": "latitude:[[value]]",
+				"bullet": "round",
+				"bulletBorderAlpha": 1,
+				"useLineColorForBulletBorder": true,
+				"bulletColor": "#FFFFFF",
+				"bulletSizeField": "townSize",
+				"dashLengthField": "dashLength",
+				"descriptionField": "townName",
+				"labelPosition": "right",
+				"labelText": "[[level]]",
+				"legendValueText": "",
+				"title": "навыки/время",
+				"fillAlphas": 0,
+				"valueField": "latitude",
+				"valueAxis": "latitudeAxis"
+			}],
+			"chartCursor": {
+				"categoryBalloonDateFormat": "",
+				"cursorAlpha": 0.1,
+				"cursorColor":"#000000",
+				"fullWidth":true,
+				"valueBalloonsEnabled": false,		
+				"categoryBalloonEnabled": false,
+				"zoomable": false
+			},
+			"dataDateFormat": "YYYY-MM-DD",
+			"categoryField": "date",
+			"categoryAxis": {
+				"dateFormats": [{
+					"period": "DD",
+					"format": "DD"
+				}, {
+					"period": "WW",
+					"format": "MMM DD"
+				}, {
+					"period": "MM",
+					"format": "MMM"
+				}, {
+					"period": "YYYY",
+					"format": "YYYY"
+				}],
+				"parseDates": true,
+				"autoGridCount": false,
+				"axisColor": "#555555",
+				"gridAlpha": 0.1,
+				"gridColor": "#FFFFFF",
+				"gridCount": 50,		
+				"labelsEnabled": false
+			},
+			"export": {
+				"enabled": true
+			 }
+		});
+		</script>		
+		
+	</body>
+</html>

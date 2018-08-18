@@ -1,0 +1,579 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<title>Зачем ручным тестировщикам учить язык программирования Go?</title>
+
+		<link rel="stylesheet" href="css/reveal.css">
+		<link rel="stylesheet" href="css/theme/simple.css">
+
+		<!-- Theme used for syntax highlighting of code -->
+		<link rel="stylesheet" href="lib/css/zenburn.css">
+
+		<!-- Printing and PDF exports -->
+		<script>
+			var link = document.createElement( 'link' );
+			link.rel = 'stylesheet';
+			link.type = 'text/css';
+			link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+			document.getElementsByTagName( 'head' )[0].appendChild( link );
+		</script>
+	</head>
+	<body>
+		<div class="reveal">
+			<div class="slides">
+				<section>
+					<img  src="img/gopher.png" />
+					
+					<aside class="notes">
+						Это гофер. Символ языка Go. Как слон в PHP, или питон в питоне, или дельфин в MySQL.
+						Как Питонисты, разработчики на го называют себя Гоферами.
+					</aside>
+				</section>
+				
+				<section>
+					<h2>Зачем ручным тестировщикам учить язык программирования Go?</h2>
+					<br>
+					<small style="text-align: center;">
+						Олег Неумывакин<br>
+						Тестировщик<br>
+						@oneumyvakin<br>
+					</small>
+				</section>
+				
+				<section>
+					<br>
+					<p style="text-align: left;">
+						<pre><code class="hljs" data-trim contenteditable>
+package main
+
+import "fmt"
+
+func main() {
+    fmt.Println("Hello, world!")
+}
+					</code></pre>
+					</p>
+
+					<aside class="notes">
+						Банальный хелло ворлд, чтобы Вы не пугались, что это какой-то мудреный язык со сложным синтаксисом.<br>
+						Один из плюсов языка - он очень простой, намного проще Java, Питона или PHP<br>
+					</aside>
+				</section>
+
+				<section>
+					<br>
+					<p style="text-align: left;">
+						<pre><code class="hljs" data-trim contenteditable>
+package main
+
+import (
+    "fmt"
+    "github.com/oneumyvakin/hello"
+)	
+
+func main() {
+    err := hello.World()
+    if err != nil {		
+        fmt.Printf("failed hello world: '%s'", err)
+        return
+    }
+}
+					</code></pre>
+					</p>
+
+					<aside class="notes">
+						Обращаю внимание на явную проверку ошибок<br>
+					</aside>
+				</section>
+				
+				<section>
+					<br>
+					<p style="text-align: left;">
+						<pre><code class="hljs" data-trim contenteditable>
+package main
+
+import (
+    "fmt"
+    "github.com/oneumyvakin/hello"
+)	
+
+func main() {
+    myLang := "ru-RU"
+    err := hello.WorldIn(myLang)
+    if err != nil {		
+        fmt.Printf("failed with lang '%s': '%s'", myLang, err)
+        return
+    }
+}
+					</code></pre>
+					</p>
+
+					<aside class="notes">
+						Ошибки проверяются постоянно.<br>
+					</aside>
+				</section>
+
+				<section>
+					<br>
+					<p style="text-align: left;">
+						<pre><code class="hljs stretch" data-trim contenteditable>
+package main
+
+import (
+    "fmt"
+    "github.com/oneumyvakin/hello"
+)
+
+func main() {
+    langs := []string{"ru-RU", "en-US",	"zh-CN", "fr-FR"}
+
+    for _, lang := range langs {
+        err := hello.WorldIn(lang)
+        if err != nil {
+            fmt.Println(err)
+            break
+        }
+    }
+}
+					</code></pre>
+					</p>
+
+					<aside class="notes">
+						Сделаем то же самое в цикле,объявим слайс строк,<br>
+						пройдемся по нему в цикле, а если что-то пойдет не по плану, <br>
+						у нас есть провека ошибок и мы залогируем ошибку и остановим цикл<br>
+						В этом цикле , для каждого элемента в слайсе, вызов функции выполняется последовательно<br>
+						<br>
+					</aside>
+				</section>
+				
+				<section>
+					<br>
+					<p style="text-align: left;">
+						<pre><code class="hljs stretch" data-trim contenteditable>
+package main
+
+import (
+    "sync"
+    "github.com/oneumyvakin/hello"
+)
+
+func main() {
+    var wg sync.WaitGroup
+    for lang := range hello.SupportedLangs {
+        wg.Add(1)
+        go wrapperForHelloWorld(lang, &wg)
+    }
+    wg.Wait()
+}
+
+func wrapperForHelloWorld(lang string, wg *sync.WaitGroup) {
+    hello.WorldIn(lang)
+    wg.Done()
+}
+					</code></pre>
+					</p>
+
+					<aside class="notes">
+						<br>
+					</aside>
+				</section>
+
+								
+				<section>
+					<br>
+					<p style="text-align: left;">
+						<pre><code class="hljs stretch" data-trim contenteditable>
+package main
+
+import (
+    "fmt"
+    "net/http"
+)
+
+func main() {
+    http.HandleFunc("/", index)
+
+    err := http.ListenAndServe(":8080", nil)
+    if err != nil { 
+        fmt.Printf("failed start server: '%s'", err)
+    }
+}
+
+func index(w http.ResponseWriter, r *http.Request) {
+    fmt.Fprintf(w, "Hello World")
+}
+					</code></pre>
+					</p>
+
+					<aside class="notes">
+						а теперь напишем свой веб-сервер c поддержкой http/2<br>
+						<br>
+					</aside>
+				</section>
+							
+				<section>
+					<h3>Use cases</h3>
+					<p style="text-align: left;">
+						<span class="fragment">- свой карманный web сервер<br></span>
+						<span class="fragment">- свой карманный прокси сервер<br></span>
+						<span class="fragment">- генерация запросов с очень тонким тюнингом<br></span>
+						<span class="fragment">- тестирование на data race'ы или race condition'ы<br></span>
+						<span class="fragment">- автоматизация тестирования (это пока спекуляция)<br></span>
+					</p>
+					
+					<aside class="notes">				
+						Вы можете сделать самостоятельно и просто следующие вещи:<br>
+						Альтернатива: nginx? внешняя зависимость?<br>
+						Альтернатива: десктопный хороший Charles? интеграция?<br>
+						Альтернатива: bash? Python? wrk?<br>
+						Selenoid, Александр Бобров из Тиньков-Банка, на QA Plesk'e, не потому что Java медленная<br>
+						Альтернативы - всегда разные инструменты<br>
+						<br>
+					</aside>
+				</section>
+				
+				<section>
+					<h1>Цель: мотивировать</h1>
+
+					<aside class="notes">
+						моя цель мотивировать Вас на изучение языка Go<br>
+						попытаюсь объяснить почему это важно, что Вы сможете получить от этого процесса<br>
+						и я это буду делать с позиции тестирования, не разработки, не автоматизации<br>
+						а для того чтобы Вы мне поверили, или наоборот сразу не поверили, немного обо мне...<br>
+					</aside>					
+				</section>
+				
+				<section>
+					<h3>Bio</h3>
+					<br>
+					<p style="text-align: left;">
+					- 10+ лет тестирования серверных коробочных решений<br>
+					- из них, ~5 лет в исследовании технических проблем<br>					
+					- рабочие задачи решал с Python, PHP, C, C#, Go<br>
+					- внимательно посмотрел на Erlang, Haskell, Rust<br>
+					</p>
+					<aside class="notes">
+						10 лет в тестировании Plesk'а, 9 мес в тестировании Яндекс.Браузера<br>
+						половина из этого времени , исследовал последствия того, как и что делают разработчики<br>
+						т.е. мы зарелизили новую фичу, новый продукт, к нам приходят разные клиенты с самыми разными проблемами<br>
+						из этого опыта, для себя я сделал такой вывод --><br>
+						<br>						
+					</aside>	
+				</section>
+		
+				<section>
+					<h3>Когда у нас нет технических знаний<br> мы делаем плохой<br> тест-дизайн</h3>
+					
+					<aside class="notes">
+						Техники тестирования против технической реализации<br>
+						и для того чтобы делать тестирование лучше, предотвращать проблемы, тестированию нужно знать...<br>
+					</aside>
+				</section>
+				
+				<section>
+					<h3>QA нужно знать как сделан продукт</h3>
+					<p style="text-align: left;">
+					- знать технические возможности и ограничения<br>						
+					- знать стандарты, плохие и хорошие практики<br>					
+					- знать проблемы разработчиков<br>
+					- говорить на одном языке с разработчиками<br>
+					- смотреть на производтво продукта с другой точки зрения<br>
+					</p>
+					<aside class="notes">
+						чтобы не тестировать в слепую<br>
+						чтобы знать проблемы разработчиков - с которыми разработчики постоянно сталкиваются<br>
+						чтобы эффективней коммуницировать, чтобы доносить свою точку зрения<br>
+						другая точка зрения - это очень мощный инструмент и мощная практика<br>
+						ей нужно уметь пользоваться, не полезна по-умолчанию, требует концентрации на переключение<br>
+						суммируя это всё, нам нужны...<br>
+					</aside>
+				</section>
+			
+				<section>
+					<h2>Нужны новые<br>концептуальные знания<br> о нашем продукте</h2>
+					
+					<aside class="notes">
+						актуальные, глубоки, знания, удобные инструменты, от проверенных людей<br>
+						каким способом мы можем их получить?<br>
+					</aside>
+				</section>
+				
+				<section>
+					<img width="10%" src="img/gopher.jpg" />
+					<p>Изучение языка Go это эффективный путь к техническим знаниям</p>
+					
+					<aside class="notes">
+						И знаниям про производтво ПО вообще<br>
+						Такой эффект достигается получился потому Go отличается, отличий много<br>
+						Создателям языка нужно было объяснить почему сделано именно это и имеено так<br>
+						Для QA, Go дает другую точку зрения, на то, что и как делают разработчики на других языках<br>
+						и мы можем перенести эту экспертизу на свой продукт со стороны обеспечения качества и надежности<br>
+						Когда Вы пишите на Go свой код, где Вы постоянно проверяете ошибки, то когда Вы видите чужой код, на другом языке, Вы видите десятки причин почему он может не работать<br>
+					</aside>
+				</section>
+				
+				<section>
+					<h3>Другая точка зрения позволяет нам понять общие сложные концепции</h3>
+					<p style="text-align: left;">					
+						<span class="fragment">- структурирование данных<br><span>
+						<span class="fragment">- данные типизированны<br><span>				
+						<span class="fragment">- исключения(exceptions) порождают альтернативную логику выполнения<br><span>	
+						<span class="fragment">- конкурентное выполнение кода<br><span>
+						<span class="fragment">- etc<br><span>	
+					</p>					
+					
+					<aside class="notes">
+						- думать в формате структурированных данных которые отделены от поведения<br>
+						- данные типизированы так или иначе<br>
+						- что произойдет когда в этой строчке кода будет exception<br>						
+					</aside>
+				</section>
+				
+				<section>
+					<img width="20%" src="img/GOPHER_SHARE.png" />
+					<p>Бонус: инструменты и их читаемый код</p>		
+					
+					<aside class="notes">
+						Создавать и использовать чужие инстурменты.
+						Масштабируемость здесь это возможность эффективно работать над кодом как одному человеку так и большой огранизации<br>
+						Но для нас важнее то что мы получаем возможность:<br> понять и изменить чужой код в минимальные сроки<br>						
+						использовать, модифицировать чужие инструменты и создавать собственные<br>	быстро и удобно<br> 
+						И уже как следствие, мы получаем больше возможностей для тестирования<br> 
+						Примеры: let's encrypt server и WPR<br>
+					</aside>
+				</section>
+				
+				<section>
+					<section>
+						<h3>Почему нет?</h3>
+						<p style="text-align: left;">
+							<span class="fragment">- нет динамической типизации(внезапно)<br></span>
+						</p>
+						
+						<aside class="notes">
+							В сообществе принято сначала говорить о недостатках Go. --><br>
+							Например, это вызывает проблемы, когда Вам нужно работать(не тестировать) с API или данными, структура которых постоянно меняется<br>
+						</aside>
+					</section>			
+					
+				</section>
+				
+				<section>
+					<h3>Почему нет?</h3>
+					<p style="text-align: left;">					
+						- Python/JS/Java-программистам будет очень не просто<br>
+						<span class="fragment">- достаточно подводных камней<br></span>
+						<span class="fragment">- не идеальный, не волшебный, не лучше других<br></span>
+					</p>
+					<aside class="notes">
+						Как и в любом языке --><br>
+						<br>
+						<br>
+					</aside>
+				</section>
+				
+				<section>
+					<h3>Для кого?</h3>
+					<p style="text-align: left;">				
+						<span class="fragment">- если Вы уже пробовали Go<br></span>
+						<span class="fragment">- если Вам нужен надежный, удобный инструмент<br></span>
+						<span class="fragment">- если Вы хотите разобраться с производительностью<br></span>
+						<span class="fragment">- если Ваш продукт кроссплатформенный<br></span>
+					</p>
+				</section>
+				
+				<section>
+					<h3>Почему Go?</h3>
+					<p style="text-align: left;">
+						<span class="fragment">- простой язык, всего 25 ключевых слов<br></span>
+						<span class="fragment">- язык стабильней чем PHP/Python/JS/C++<br></span>
+						<span class="fragment">- хорошая стандартная библиотека<br></span>
+						<span class="fragment">- маленькая экосистема<br></span>
+						<span class="fragment">- большое сообщество<br></span>
+					</p>
+					<aside class="notes">
+						Каждый релиз Go скучнее предыдущего<br>
+						<br>
+						<br>
+					</aside>
+				</section>
+				
+				<section>
+					<h3>Почему Go?</h3>
+					<p style="text-align: left;">
+						- читаемый код<br>
+						- настоятельно подталкивает проверять ошибки<br>
+						- вынуждает структурировать данные<br>							
+						- вынуждает явно отделить данные от поведения<br>							
+						- не скрывает технический долг<br>
+					</p>
+				</section>				
+				
+				<section>
+					<h3>Почему Go?</h3>
+					<p style="text-align: left;">
+						- написан на Go, а не на С/C++ как PHP, Python, JS<br>
+					</p>
+				</section>
+				
+				<section>
+					<h3>Почему Go?</h3>
+					<p style="text-align: left;">
+						Из коробки:<br>
+						- выполнение тестов с code coveragе<br>
+						- выполнение бенчмарков<br>							
+						- профилирование производительности<br>
+						- кросскомпиляция<br>
+						- генерация документации<br>
+						- code style<br>
+					</p>
+				</section>
+				
+				<section>
+					<h3>Что брать?</h3>
+					<p style="text-align: left;">
+						- https://golang.org/<br>
+						- JetBrains IDE: GoLand<br>
+						- Visual Studio Code<br>
+					</p>
+				</section>
+				
+				<section>
+					<section>
+						
+						<h3>Как начать?</h3>
+						<p style="text-align: left;">
+							- скачать и установить компилятор с <a href="https://golang.org/">golang.org</a><br>
+							- разобраться с переменной окружения GOPATH<br>
+							- написать код в файле %GOPATH%\src\myapp\main.go<br>
+							- собрать: go build -o myapp.exe myapp<br>
+							- запустить myapp.exe<br>
+						</p>
+					</section>				
+					
+					<section>
+						<h3>Как продолжить?</h3>
+						<p style="text-align: left;">
+							- <a href="https://tour.golang.org/" target="_blank">tour.golang.org</a><br>
+						</p>
+					</section>
+					
+					<section>
+						<h3>Как продолжить?</h3>
+						<p style="text-align: left;">
+							- писать код<br>
+						</p>
+					</section>
+					
+					<section>
+						<h3>Как продолжить?</h3>
+						<p style="text-align: left;">
+							- <a href="https://habr.com/company/mailru/blog/314804/" target="_blank">Ловушки, подводные камни и распространённые ошибки новичков</a><br>
+							- Книга «Язык программирования Go» авторства Алан А. А. Донован, Брайан У. Керниган<br>
+						</p>
+					</section>
+					
+					<section>
+						<h3>Как продолжить?</h3>
+						<p style="text-align: left;">
+							Доклады/статьи от авторов языка:<br>
+							- Rob Pike<br>
+							- Russ Cox<br>
+							- Robert Griesemer<br>
+							- Ken Thomson<br>
+							- Andrew Gerrand<br>
+							- Brad Fitzpatrick<br> 							
+						</p>
+					</section>
+					
+					<section>
+						<h3>Как продолжить?</h3>
+						<p style="text-align: left;">
+							Доклады/статьи:<br>
+							- Dmitry Vyukov<br>
+							- Марко Кевац<br>
+							- Вячеслав Бахмутов<br>
+							- Сергей Камардин<br>
+						</p>
+					</section>
+					
+					<section>
+						<h3>Сообщество?</h3>
+						<p style="text-align: left;">
+							- Подкаст: <a href="https://golangshow.com" target="_blank">golangshow.com</a><br>
+							- Slack: <a href="http://slack.golang-ru.com/" target="_blank">slack.golang-ru.com</a><br>
+							- <a href="https://twitter.com/4gophers" target="_blank">twitter.com/4gophers</a><br>
+						</p>
+					</section>
+				</section>
+				
+				<section>
+					<h3>Сложна!</h3>
+					
+					<iframe  width="100%" height="500px" src="chart.html"></iframe>
+					<!-- <img src="chart.png" />-->
+				</section>
+				
+				<section>
+					<h1>Вопросы?</h1>
+					
+					
+				</section>
+				
+				<section>
+					<section>
+						<h1>Учите Go</h1>	
+						<p style="text-align: left;">
+							- <a href="https://golang.org/">golang.org</a><br>
+							- <a href="https://tour.golang.org/" target="_blank">tour.golang.org</a><br>
+							- <a href="https://golangshow.com" target="_blank">golangshow.com</a><br>
+							- <a href="https://t.me/qa_siberia" target="_blank">t.me/qa_siberia</a>
+						</p>
+						<img  src="img/dancing_gopher.gif" />			
+					</section>
+					
+					<section>
+						<p style="text-align: left;">
+							Марк Лутц, "Изучаем Python":<br>
+							
+							Ниже приводится цитата ... принадлежащая давнему разработчику Python Тиму Петерсу:
+							<blockquote>							
+							"[Метаклассы] – это гораздо более серьезная тема, которая не затрагивает 99% пользователей. Если вы задаетесь вопросом – нужны ли вам метаклассы, то, скорее всего, - не нужны (те, кому они действительно нужны, точно знают об этом и им не нужно объяснять – зачем они нужны)."</blockquote>
+						</p>
+					</section>
+					
+					<section>
+						<p style="text-align: left;">
+							Марк Лутц, "Изучаем Python":
+							<blockquote>Другими словами, метаклассы в первую очередь предназначены для программистов, занимающихся созданием библиотек и инструментов, которыми будут пользоваться другие.</blockquote>
+						</p>
+					</section>
+				</section>
+			</div>
+		</div>
+
+		<script src="lib/js/head.min.js"></script>
+		<script src="js/reveal.js"></script>
+
+		
+		<script>
+			// More info about config & dependencies:
+			// - https://github.com/hakimel/reveal.js#configuration
+			// - https://github.com/hakimel/reveal.js#dependencies
+			Reveal.initialize({
+				dependencies: [
+					{ src: 'plugin/markdown/marked.js' },
+					{ src: 'plugin/markdown/markdown.js' },
+					{ src: 'plugin/notes/notes.js', async: true },
+					{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+					{ src: 'plugin/highlight/go.min.js', async: true  }
+				]
+			});
+		</script>		
+		
+	</body>
+</html>
